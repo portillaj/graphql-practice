@@ -17,13 +17,31 @@ const users = [{
   email: 'noahportilla@gmail.com'
 }];
 
+const posts = [{
+  id: '1',
+  title: 'GraphQL is great',
+  body: 'The best api in town',
+  published: true
+}, {
+  id: '2',
+  title: 'I Love my Wife',
+  body: 'When you have a beautiful woman, its great',
+  published: true
+}, {
+  id: '3',
+  title: 'Video Games are awesome',
+  body: 'I Love playing the coolest games',
+  published: false
+}];
+
 // 5 Scalar types
 // String, Boolean, Int, Float, ID
 
 // Type definitions (app schema)
 const typeDefs = `
   type Query {
-    users: [User!]!
+    users(query: String): [User!]!
+    posts(query: String): [Post!]!
     me: User!
     post: Post!
   }
@@ -47,7 +65,21 @@ const typeDefs = `
 const resolvers = {
   Query: {
     users(parent, args, ctx, info) {
-      return users;
+      if(!args.query) {
+        return users;
+      }
+      return users.filter((user) => {
+        return user.name.toLowerCase().includes(args.query.toLowerCase());
+      });
+    },
+    posts(parent, args, ctx, info) {
+      if(!args.query) {
+        return posts;
+      }
+      return posts.filter((post) => {
+        return post.title.toLowerCase().includes(args.query.toLowerCase()) ||
+        post.body.toLowerCase().includes(args.query.toLowerCase());
+      });
     },
     me() {
       return {
