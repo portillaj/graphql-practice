@@ -21,17 +21,41 @@ const posts = [{
   id: '1',
   title: 'GraphQL is great',
   body: 'The best api in town',
-  published: true
+  published: true,
+  author: '1'
 }, {
   id: '2',
   title: 'I Love my Wife',
   body: 'When you have a beautiful woman, its great',
-  published: true
+  published: true,
+  author: '1'
 }, {
   id: '3',
   title: 'Video Games are awesome',
   body: 'I Love playing the coolest games',
-  published: false
+  published: false,
+  author: '2'
+}];
+
+const comments = [{
+  id: '10',
+  text: 'This is awesome',
+  author: '1'
+},
+{
+  id: '12',
+  text: 'Second comment coming through',
+  author: '2'
+},
+{
+  id: '15',
+  text: 'Third comment coming through',
+  author: '1'
+},
+{
+  id: '16',
+  text: 'fourth comment coming through',
+  author: '2'
 }];
 
 // 5 Scalar types
@@ -44,6 +68,7 @@ const typeDefs = `
     posts(query: String): [Post!]!
     me: User!
     post: Post!
+    comments: [Comment!]!
   }
 
   type User {
@@ -51,6 +76,8 @@ const typeDefs = `
     name: String!
     email: String!
     age: Int
+    posts: [Post!]!
+    comments: [Comment!]!
   }
 
   type Post {
@@ -58,6 +85,13 @@ const typeDefs = `
     title: String!
     body: String!
     published: Boolean!
+    author: User!
+  }
+
+  type Comment {
+    id: ID!
+    text: String!
+    author: User!
   }
 `;
 
@@ -81,6 +115,9 @@ const resolvers = {
         post.body.toLowerCase().includes(args.query.toLowerCase());
       });
     },
+    comments(parent, args, ctx,info) {
+      return comments;
+    },
     me() {
       return {
         id: '123098',
@@ -96,6 +133,32 @@ const resolvers = {
         body: 'The book was great',
         published: true
       }
+    }
+  },
+  Post: {
+    author(parent, args, ctx, info) {
+      return users.find((user) => {
+        return user.id === parent.author;
+      });
+    }
+  },
+  User: {
+    posts(parent, args, ctx, info) {
+      return posts.filter(post => {
+        return post.author === parent.id;
+      });
+    },
+    comments(parent, args, ctx, info) {
+      return comments.filter(comment => {
+        return comment.author === parent.id;
+      });
+    }
+  },
+  Comment: {
+    author(parent, args, ctx, info) {
+      return users.find((user) => {
+        return user.id === parent.author;
+      });
     }
   }
 };
